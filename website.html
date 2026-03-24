@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Umfrage zu Fahrrad-Alleinunfällen in Hessen</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch@3.11.0/dist/geosearch.css" />
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="wrapper"> <!-- Äußerer Container für die gesamte Inhaltsbreite -->
+
+        <div class="intro-box"> <!-- Box für den Einführungstext der Umfrage -->
+
+            <h1>Umfrage zu Fahrrad-Alleinunfällen in Hessen</h1>
+            <hr>
+            <p>
+                Im Rahmen meiner Masterarbeit werden Alleinunfälle im Radverkehr untersucht.
+                Dabei handelt es sich um Unfälle, bei denen keine weiteren Verkehrsteilnehmenden beteiligt sind.
+            </p>
+
+            <p>
+                Ziel der Untersuchung ist es, wichtige Einflussfaktoren zu identifizieren, die zu solchen Unfällen
+                beitragen können.
+                Im Mittelpunkt der Untersuchung stehen insbesondere infrastrukturelle Merkmale wie Steigungen,
+                Bordsteine, Hindernisse oder andere bauliche Gegebenheiten der Radverkehrsinfrastruktur.
+            </p>
+
+            <p>
+                Die Ergebnisse sollen dazu beitragen, kritische Stellen besser zu erkennen und eine fundierte Grundlage
+                für die zukünftige Planung und Verbesserung der Radverkehrsinfrastruktur zu schaffen.
+                Damit kann die Verkehrssicherheit für Radfahrende langfristig verbessert werden.
+            </p>
+            <p>
+                Die Bearbeitung der Umfrage dauert in der Regel etwa <strong>5 Minuten</strong>.
+            </p>
+
+            <p>
+                Im weiteren Verlauf der Umfrage können Sie Orte auf einer Karte markieren, an denen Sie selbst einen
+                Alleinunfall mit dem Fahrrad erlebt haben. Bitte berücksichtigen Sie dabei ausschließlich Ereignisse
+                <strong>in Hessen</strong>, die sich <strong>ab dem 01.01.2016</strong> ereignet haben.
+            </p>
+
+            <p>
+                Mit der Teilnahme an dieser Umfrage erklären Sie sich damit einverstanden, dass Ihre anonymisierten
+                Antworten
+                für wissenschaftliche Zwecke verwendet werden dürfen. Alle Daten werden vertraulich behandelt und nur
+                für die Dauer der Studie gespeichert. Sie können die Teilnahme jederzeit ohne Angabe von Gründen
+                beenden.
+            </p>
+
+            <p class="contact">
+                Kontakt bei Rückfragen:<br>
+                Anita Nisius<br>
+                Hochschule Trier, Umwelt-Campus Birkenfeld<br>
+                E-Mail: umfrageradverkehr@gmail.com
+            </p>
+            <p class="note">
+                Vielen Dank für Ihre Unterstützung!
+            </p>
+            
+            <div class="consent-box">
+                <label class="consent-label">
+                    <input type="checkbox" id="consent-checkbox">
+                    Ich habe die Informationen zur Umfrage gelesen und bin damit einverstanden,
+                    dass meine anonymisierten Angaben für wissenschaftliche Zwecke im Rahmen
+                    dieser Masterarbeit verwendet werden.
+                </label>
+
+                <p id="consent-warning" class="warning-text" style="display:none;">
+                    Bitte stimmen Sie der Teilnahme zu, bevor Sie fortfahren.
+                </p>
+            </div>
+            
+            
+            <div class="button-row"> <!-- Container für den Startbutton -->
+                <button id="start-survey" class="start-button">Zur Umfrage</button> <!-- Link zur Umfrage als Button -->
+            </div>
+
+
+        </div>
+
+
+
+
+        <div id="survey" class="survey-section">
+            <h2>Start der Umfrage</h2>
+            <hr>
+
+            <p>
+                Markieren Sie auf der Karte den Ort, an dem Sie einen Alleinunfall mit dem Fahrrad erlebt haben.
+            </p>
+
+
+            <p>
+                <strong>So funktioniert die Eingabe:</strong><br>
+                1) Nutzen Sie bei Bedarf die Suchfunktion oberhalb der Karte, um einen Ort zu finden.<br>
+                2) Klicken Sie anschließend auf die Karte, um einen Unfallort zu markieren.<br>
+                3) Nach dem Setzen eines Punktes erscheint unter der Karte ein Eingabefeld zum jeweiligen Punkt.<br>
+                4) Sie können mehrere Orte markieren, falls Sie mehrere Unfälle erlebt haben.<br>
+                5) Ein gesetzter Punkt kann über den Button <em>„Punkt löschen“</em> wieder entfernt werden.
+            </p>
+
+            <p>
+                Die Uhrzeit des Unfalls wird in 30-Minuten-Schritten abgefragt, um die Eingabe zu vereinfachen und
+                auch dann eine Teilnahme zu ermöglichen, wenn die genaue Uhrzeit nicht mehr bekannt ist.
+            </p>
+
+            <p>Bitte machen Sie im Kommentarfeld keine Angaben zu Namen oder sonstigen personenbezogenen Informationen.</p>
+
+            <div id="map"></div>
+            
+            <div class="points-section">
+
+                <h3>Angaben zu den markierten Punkten</h3>
+
+                <div id="no-points-hint" class="hint-text">
+                    Bitte markieren Sie mindestens einen Punkt und füllen Sie die Angaben zu allen markierten Punkten vollständig aus.
+                </div>
+
+                <div id="questions"></div>
+
+            </div>
+
+            <div class="submit-row">
+                <button id="submit-survey" class="submit-button" type="button" disabled>
+                    Absenden
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="thank-you-overlay" class="thank-you-overlay">
+    <div class="thank-you-box">
+        <h2>Vielen Dank für Ihre Teilnahme!</h2>
+
+        <p>
+            Ihre Angaben wurden erfolgreich übermittelt und tragen dazu bei,
+            Alleinunfälle im Radverkehr besser zu verstehen.
+        </p>
+
+        <p>
+            Bei Rückfragen können Sie sich gerne an folgende Ansprechperson wenden:
+        </p>
+
+        <p class="contact">
+            Anita Nisius<br>
+            Hochschule Trier – Umwelt-Campus Birkenfeld<br>
+            E-Mail: umfrageradverkehr@gmail.com
+        </p>
+
+        <p>
+            Sie können dieses Fenster nun schließen.
+        </p>
+
+    </div>
+</div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-geosearch@3.11.0/dist/bundle.min.js"></script>
+
+
+
+    <script src="script.js"></script>
+
+</body>
+
+
+
+
+</html>
