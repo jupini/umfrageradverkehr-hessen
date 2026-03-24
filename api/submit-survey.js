@@ -1,56 +1,63 @@
 import { createClient } from "@supabase/supabase-js";
-
-console.log("DATEI GELADEN");
-
-const hasSupabaseUrl = !!process.env.SUPABASE_URL;
-const hasServiceRoleKey = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-console.log("ENV CHECK", {
-    hasSupabaseUrl,
-    hasServiceRoleKey
-});
+import { Redis } from "@upstash/redis";
+import { Ratelimit } from "@upstash/ratelimit";
 
 const supabase = createClient(
     process.env.SUPABASE_URL,
     process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-export default async function handler(req, res) {
-    console.log("HANDLER GESTARTET");
+const redis = Redis.fromEnv();
 
+const ratelimit = new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(15, "10 m"),
+    analytics: true
+});
+
+function getClientIp(req) {
+    const forwarded = req.headers["x-forwarded-for"];
+
+    if (typeof forwarded === "string" && forwarded.length > 0) {
+        return forwarded.split(",")[0].trim();
+    }
+
+    return "unknown";
+}
+
+export default async function handler(req, res) {
     if (req.method !== "POST") {
-        console.log("FALSCHE METHODE:", req.method);
         return res.status(405).json({ error: "Nur POST erlaubt" });
     }
 
     try {
-        const surveyData = req.body;
+        const ip = getClientIp(req);
+        const { success } = await ratelimit.limit(`survey:${ip}`);
 
-        console.log("Empfangene Daten:", surveyData);
-
-        if (!Array.isArray(surveyData) || surveyData.length === 0) {
-            console.log("UNGÜLTIGE DATEN");
-            return res.status(400).json({ error: "Ungültige Daten" });
+        if (!success) {
+            return res.status(429).json({
+                error: "Zu viele Anfragen. Bitte später erneut versuchen."
+            });
         }
 
-        console.log("VOR INSERT");
+        const surveyData = req.body;
+
+        if (!Array.isArray(surveyData) || surveyData.length === 0) {
+            return res.status(400).json({ error: "Ungültige Daten" });
+        }
 
         const { error } = await supabase
             .from("survey_points")
             .insert(surveyData);
 
-        console.log("NACH INSERT", { error });
-
         if (error) {
             console.error("Supabase-Fehler:", error);
-            return res.status(500).json({ error: error.message });
+            return res.status(500).json({ error: "Fehler beim Speichern in Supabase" });
         }
 
-        console.log("INSERT ERFOLGREICH");
         return res.status(200).json({ ok: true });
-
     } catch (error) {
-        console.error("SERVERFEHLER IM CATCH:", error);
+        console.error("Serverfehler:", error);
         return res.status(500).json({ error: "Serverfehler" });
     }
 }
