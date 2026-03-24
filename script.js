@@ -486,6 +486,11 @@ submitButton.addEventListener("click", async function () {
 
         const result = await response.json();
 
+        if (response.status === 429) {
+            alert("Sie haben die Umfrage zu häufig abgeschickt. Bitte versuchen Sie es später erneut.");
+            return;
+        }
+
         if (!response.ok) {
             throw new Error(result.error || "Fehler beim Speichern");
         }
